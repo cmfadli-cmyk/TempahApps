@@ -1,0 +1,92 @@
+<?php
+require_once '../../config/database.php';
+
+$mesej = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama = trim($_POST['nama'] ?? '');
+    $tujuan = trim($_POST['tujuan'] ?? '');
+    $tarikh_pinjam = $_POST['tarikh_pinjam'] ?? '';
+    $tarikh_pulang = $_POST['tarikh_pulang'] ?? '';
+    $jumlah_laptop = (int)($_POST['jumlah_laptop'] ?? 0);
+    $jumlah_pencetak = (int)($_POST['jumlah_pencetak'] ?? 0);
+
+    if (!empty($nama) && !empty($tujuan) && !empty($tarikh_pinjam) && !empty($tarikh_pulang)) {
+        $stmt = $pdo->prepare("INSERT INTO permohonan_pinjaman 
+            (nama_pemohon, tujuan, tarikh_pinjam, tarikh_pulang, jumlah_laptop, jumlah_pencetak) 
+            VALUES (?, ?, ?, ?, ?, ?)");
+        
+        if ($stmt->execute([$nama, $tujuan, $tarikh_pinjam, $tarikh_pulang, $jumlah_laptop, $jumlah_pencetak])) {
+            $mesej = "Permohonan berjaya dihantar!";
+        } else {
+            $mesej = "Ralat semasa menyimpan permohonan.";
+        }
+    } else {
+        $mesej = "Sila lengkapkan semua medan wajib (*).";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borang Pinjaman Aset ICT</title>
+    <!-- Framework CSS ringkas (Bootstrap) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+<div class="container" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Borang Pinjaman Aset ICT</h5>
+        </div>
+        <div class="card-body">
+            <?php if (!empty($mesej)): ?>
+                <div class="alert alert-info"><?= htmlspecialchars($mesej) ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <div class="mb-3">
+                    <label class="form-label">Nama Pemohon *</label>
+                    <input type="text" name="nama" class="form-control" required placeholder="Contoh: Muhammad Zulqhairi">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tujuan Peminjaman *</label>
+                    <textarea name="tujuan" class="form-control" rows="3" required placeholder="Nyatakan mesyuarat, kursus atau tugasan"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tarikh Peminjaman *</label>
+                        <input type="date" name="tarikh_pinjam" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tarikh Dijangka Pulang *</label>
+                        <input type="date" name="tarikh_pulang" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Jumlah Laptop</label>
+                        <input type="number" name="jumlah_laptop" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Jumlah Pencetak</label>
+                        <input type="number" name="jumlah_pencetak" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="../../index.php" class="btn btn-secondary">Batal</a>
+                    <button type="submit" class="btn btn-primary">Hantar Permohonan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
